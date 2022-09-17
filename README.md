@@ -1,34 +1,18 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Speakeasy
+I quickly built this app after my pops, battling Parkinson's disease for nearly 20 years, as he lost his ability to make precise movement, and verbally communicate. I wanted to know and understand his needs as I sat bedside, and I built this React app over the course of an evening.
 
-## Getting Started
+The premise is that a screen is displayed with phrases or letters. The selected letter or phrase change on a timer, and all the person has to do is press the `left mouse button`, or `enter`.
 
-First, run the development server:
+## Phrase Mode
+![Alt text](./screenshots/phrases.png?raw=true "Phrase Mode")
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+## Letters Mode
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+![Alt text](./screenshots/letters.png?raw=true "Letters Mode")
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+# Contributing
+I don't know if this will be of use to others, but it was meaningful for me to share this, in the hopes of something good coming from this difficult time.
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+**There Are Bugs** but I wasn't going for perfect (just check out the inline styles 😀), just useful. If this is of use to you, please send a PR and make it better.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+💔
