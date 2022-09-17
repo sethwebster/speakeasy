@@ -3,6 +3,8 @@ I quickly built this app after my pops, battling Parkinson's disease for nearly 
 
 The premise is that a screen is displayed with phrases or letters. The selected letter or phrase change on a timer, and all the person has to do is press the `left mouse button`, or `enter`.
 
+[Use it for free](https://speakeasy-sethwebster.vercel.app)
+
 ## Phrase Mode
 ![Alt text](./screenshots/phrases.png?raw=true "Phrase Mode")
 
