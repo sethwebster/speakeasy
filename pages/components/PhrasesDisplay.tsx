@@ -1,42 +1,43 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import useKeyPress from "../../hooks/useKeypress";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import useKeyPress, { useScopedKeyPress } from "../../hooks/useKeypress";
 import { useMouseDown } from "../../hooks/useMouseDown";
 import { inspect } from "../../helpers/inspect";
 import Letter from "./Letter";
+import useAppState from "../../data/app-state";
+import { useMouseUp } from "../../hooks/useMouseUp";
+import useInterval from "../../hooks/useInterval";
 
 interface PhraseDisplayProps {
   play: boolean;
   speedMs: number;
 }
-if (typeof window !== "undefined") window.speechSynthesis.cancel();
-
-const PossiblePhraseOptions = [
-  "Thirsty",
-  "Hungry",
-  "Pain",
-  "Tired",
-  "Medicine",
-  "Dirty",
-  "Need a Change",
-  "Dry Mouth",
-  "Get up",
-  "Love",
-  "You",
-] as const;
-
-type PossiblePhrase = typeof PossiblePhraseOptions[number];
 
 export default function PhrasesDisplay({ play, speedMs }: PhraseDisplayProps) {
+  const [appState, setAppState] = useAppState();
   const [current, setCurrent] = useState(0);
   const [sentence, setSentence] = useState("");
-  const parent = useRef<HTMLDivElement>(null);
+  const [adding, setAdding] = useState(false);
+  const [newPhrase, setNewPhrase] = useState("");
+  const phrasesDiv = useRef<HTMLDivElement>(null);
+  const sentenceDiv = useRef<HTMLDivElement>(null);
 
-  const enterPressed = useKeyPress("Enter", () => {
-    setSentence((s) => s + PossiblePhraseOptions[current] + " ");
-  });
+  const addToSentence = useCallback(() => {
+    startTransition(() => {
+      setSentence((s) => s + appState.phrases[current] + " ");
+    });
+  }, [appState.phrases, current]);
+
   const leftPressed = useKeyPress("ArrowLeft", () => {
-    setCurrent((c) => (c === 0 ? PossiblePhraseOptions.length - 1 : c - 1));
+    setCurrent((c) => (c === 0 ? appState.phrases.length - 1 : c - 1));
   });
+
   const backspacePressed = useKeyPress("Backspace", () => {
     setSentence((s) =>
       s
@@ -54,36 +55,61 @@ export default function PhrasesDisplay({ play, speedMs }: PhraseDisplayProps) {
     setCurrent(0);
   });
 
-  const mousePressed = useMouseDown(parent.current, () => {
-    setSentence((s) => s + PossiblePhraseOptions[current] + " ");
-  });
+  const handleNewPhraseChanged = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setNewPhrase(e.target.value);
+    },
+    []
+  );
 
-  useEffect(() => {
-    let interval: NodeJS.Timer;
+  const handleAddingKeyUp = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") {
+        setAppState((s) => ({
+          ...s,
+          phrases: [...s.phrases, newPhrase],
+        }));
+        setAdding(false);
+      }
+    },
+    [newPhrase, setAppState]
+  );
+
+  useInterval(() => {
     if (play) {
-      interval = setInterval(() => {
-        setCurrent((c) => (c + 1) % PossiblePhraseOptions.length);
-      }, speedMs);
+      setCurrent((c) => (c + 1) % appState.phrases.length);
     }
-    return () => clearInterval(interval);
-  }, [play, current, speedMs, sentence]);
+  }, speedMs);
+
   return (
-    <div ref={parent} style={{ height: "100vh", width: "100vw" }}>
+    <div
+      style={{ height: "100vh", width: "100vw" }}
+      id="phrases-wrapper"
+      onMouseUp={addToSentence}
+    >
       <div
+        ref={phrasesDiv}
         style={{
           display: "flex",
           flexWrap: "wrap",
         }}
       >
-        {PossiblePhraseOptions.map((phrase, i) => (
+        {appState.phrases.map((phrase, i) => (
           <div
+            onDoubleClick={() => {
+              setAppState((s) => ({
+                ...s,
+                phrases: s.phrases.filter((p) => p !== phrase),
+              }));
+            }}
+            onClick={addToSentence}
             style={{
               padding: 20,
               fontSize: "4em",
               border: "1px solid #333",
               margin: 4,
               backgroundColor:
-                PossiblePhraseOptions[i] === PossiblePhraseOptions[current]
+                appState.phrases[i] === appState.phrases[current]
                   ? "#AAA"
                   : "#333",
             }}
@@ -93,7 +119,40 @@ export default function PhrasesDisplay({ play, speedMs }: PhraseDisplayProps) {
           </div>
         ))}
       </div>
-      <div style={{ fontSize: "10em" }}>{sentence}</div>
+      {!adding && (
+        <button
+          style={{
+            padding: 20,
+            fontSize: "4em",
+            border: "1px solid #333",
+            margin: 4,
+            backgroundColor: "#333",
+            cursor: "pointer",
+          }}
+          onClick={() => setAdding(true)}
+        >
+          +
+        </button>
+      )}
+      {adding && (
+        <div style={{ margin: 4, width: "100%" }}>
+          <input
+            style={{ fontSize: "2em", padding: 20 }}
+            type="text"
+            value={newPhrase}
+            onChange={handleNewPhraseChanged}
+            onKeyUp={handleAddingKeyUp}
+            autoFocus
+          />
+        </div>
+      )}
+      <div
+        style={{ fontSize: "10em", height: "100%" }}
+        ref={sentenceDiv}
+        onClick={addToSentence}
+      >
+        {sentence}
+      </div>
       <div
         style={{
           position: "fixed",

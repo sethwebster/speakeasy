@@ -9,6 +9,7 @@ import { promises as fs } from "fs";
 import LettersDisplay from "./components/LetterDisplay";
 import Menu, { MenuSelection } from "./components/Menu";
 import PhrasesDisplay from "./components/PhrasesDisplay";
+import useAppState from "../data/app-state";
 
 export async function getStaticProps() {
   const data = await fs.readFile("public/words.txt", "utf8");
@@ -20,9 +21,11 @@ export async function getStaticProps() {
 interface NextPageProps {
   words: string[];
 }
+
 const Home: NextPage<NextPageProps> = ({ words }: NextPageProps) => {
+  const [appState, setAppState] = useAppState();
   const [currentMenuSelection, setCurrentMenuSelection] =
-    useState<MenuSelection>("Phrases");
+    useState<MenuSelection>(appState.mode);
   const [speedSeconds, setSpeedSeconds] = useState(2);
 
   return (
@@ -43,7 +46,10 @@ const Home: NextPage<NextPageProps> = ({ words }: NextPageProps) => {
           padding: 0,
         }}
       >
-        <Menu current={currentMenuSelection} onChange={setCurrentMenuSelection}>
+        <Menu
+          current={appState.mode}
+          onChange={(mode) => setAppState({ ...appState, mode })}
+        >
           <input
             style={{
               fontSize: "2em",
@@ -59,14 +65,16 @@ const Home: NextPage<NextPageProps> = ({ words }: NextPageProps) => {
             placeholder="Speed (higher is slower)"
           />
         </Menu>
-        {currentMenuSelection === "Letters" && (
+
+        {appState.mode === "Letters" && (
           <LettersDisplay
             play={speedSeconds > 0}
             words={words}
             speedMs={(speedSeconds > 0 ? speedSeconds : 2) * 1000}
           />
         )}
-        {currentMenuSelection === "Phrases" && (
+
+        {appState.mode === "Phrases" && (
           <PhrasesDisplay
             play={speedSeconds > 0}
             speedMs={(speedSeconds > 0 ? speedSeconds : 2) * 1000}

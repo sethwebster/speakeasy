@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-export function useMouseUp(parent: HTMLElement, callback: () => void) {
+export function useMouseUp(parent: HTMLElement | null | undefined, callback: () => void) {
   // State for keeping track of whether key is pressed
   const [keyPressed, setKeyPressed] = useState<boolean>(false);
   // If pressed key is our target key then set to true
@@ -11,6 +11,7 @@ export function useMouseUp(parent: HTMLElement, callback: () => void) {
   }, [callback]);
   // Add event listeners
   useEffect(() => {
+    if (!parent) return;
     parent.addEventListener("mouseup", upHandler);
     // Remove event listeners on cleanup
     return () => {
