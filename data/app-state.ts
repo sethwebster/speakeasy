@@ -1,6 +1,6 @@
 import { useState } from "react";
 import useLocalStorage from "../hooks/useLocalStorage";
-import { MenuSelection } from "../pages/components/Menu";
+import { MenuSelection } from "../components/Menu";
 
 const PossiblePhraseOptions = [
   "Thirsty",

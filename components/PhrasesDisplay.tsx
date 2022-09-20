@@ -6,13 +6,15 @@ import {
   useRef,
   useState,
 } from "react";
-import useKeyPress, { useScopedKeyPress } from "../../hooks/useKeypress";
-import { useMouseDown } from "../../hooks/useMouseDown";
-import { inspect } from "../../helpers/inspect";
+import useKeyPress, { useScopedKeyPress } from "../hooks/useKeypress";
+import { useMouseDown } from "../hooks/useMouseDown";
+import { inspect } from "../helpers/inspect";
 import Letter from "./Letter";
-import useAppState from "../../data/app-state";
-import { useMouseUp } from "../../hooks/useMouseUp";
-import useInterval from "../../hooks/useInterval";
+import useAppState from "../data/app-state";
+import { useMouseUp } from "../hooks/useMouseUp";
+import useInterval from "../hooks/useInterval";
+import InstructionItem from "./InstructionItem";
+import Instructions from "./Instructions";
 
 interface PhraseDisplayProps {
   play: boolean;
@@ -27,6 +29,7 @@ export default function PhrasesDisplay({ play, speedMs }: PhraseDisplayProps) {
   const [newPhrase, setNewPhrase] = useState("");
   const phrasesDiv = useRef<HTMLDivElement>(null);
   const sentenceDiv = useRef<HTMLDivElement>(null);
+  const [mouseOverPause, setMouseOverPause] = useState(false);
 
   const addToSentence = useCallback(() => {
     startTransition(() => {
@@ -75,65 +78,57 @@ export default function PhrasesDisplay({ play, speedMs }: PhraseDisplayProps) {
     [newPhrase, setAppState]
   );
 
+  const handleMouseOver = useCallback((index: number) => {
+    setCurrent(index);
+    setMouseOverPause(true);
+  }, []);
+
+  const handleMouseOut = useCallback(() => {
+    setMouseOverPause(false);
+  }, []);
+
   useInterval(() => {
-    if (play) {
+    if (play && !mouseOverPause) {
       setCurrent((c) => (c + 1) % appState.phrases.length);
     }
   }, speedMs);
 
   return (
-    <div
-      style={{ height: "100vh", width: "100vw" }}
-      id="phrases-wrapper"
-      onMouseUp={addToSentence}
-    >
-      <div
-        ref={phrasesDiv}
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-        }}
-      >
+    <div className="w-full h-full flex flex-col" id="phrases-wrapper">
+      <div ref={phrasesDiv} className="flex flex-wrap w-full">
         {appState.phrases.map((phrase, i) => (
-          <div
-            onDoubleClick={() => {
-              setAppState((s) => ({
-                ...s,
-                phrases: s.phrases.filter((p) => p !== phrase),
-              }));
-            }}
-            onClick={addToSentence}
-            style={{
-              padding: 20,
-              fontSize: "4em",
-              border: "1px solid #333",
-              margin: 4,
-              backgroundColor:
+          <>
+            <div
+              onDoubleClick={() => {
+                setAppState((s) => ({
+                  ...s,
+                  phrases: s.phrases.filter((p) => p !== phrase),
+                }));
+              }}
+              onClick={addToSentence}
+              onMouseOver={() => handleMouseOver(i)}
+              onMouseOut={handleMouseOut}
+              className={`text-6xl p-10 border-slate-600 border m-2 shadow-md rounded-sm ${
                 appState.phrases[i] === appState.phrases[current]
-                  ? "#AAA"
-                  : "#333",
-            }}
-            key={i + "" + phrase}
-          >
-            {phrase}
-          </div>
+                  ? "bg-gray-600  text-white"
+                  : "bg-gray-900  text-slate-500"
+              }`}
+              key={i + "" + phrase}
+            >
+              {phrase}
+            </div>
+            {/* Add the add button last */}
+            {i === appState.phrases.length - 1 && !adding && (
+              <button
+                className="p-10 m-2 text-6xl bg-gray-900 text-slate-500 border cursor-pointer"
+                onClick={() => setAdding(true)}
+              >
+                +
+              </button>
+            )}
+          </>
         ))}
       </div>
-      {!adding && (
-        <button
-          style={{
-            padding: 20,
-            fontSize: "4em",
-            border: "1px solid #333",
-            margin: 4,
-            backgroundColor: "#333",
-            cursor: "pointer",
-          }}
-          onClick={() => setAdding(true)}
-        >
-          +
-        </button>
-      )}
       {adding && (
         <div style={{ margin: 4, width: "100%" }}>
           <input
@@ -147,39 +142,21 @@ export default function PhrasesDisplay({ play, speedMs }: PhraseDisplayProps) {
         </div>
       )}
       <div
-        style={{ fontSize: "10em", height: "100%" }}
         ref={sentenceDiv}
         onClick={addToSentence}
+        className="text-8xl text-slate-300 h-full"
       >
         {sentence}
       </div>
-      <div
-        style={{
-          position: "fixed",
-          bottom: 0,
-          color: "#ccc",
-          padding: 40,
-          border: "1px solid #333",
-          width: "100%",
-          background: "#222",
-        }}
-      >
-        <span style={{ padding: 20, border: "1px solid #aaa" }}>
-          Mouse Click, Enter/Return: Add Phrase
-        </span>
-        <span style={{ padding: 20, border: "1px solid #aaa", marginLeft: 10 }}>
-          Left Arrow: Go Back
-        </span>
-        <span style={{ padding: 20, border: "1px solid #aaa", marginLeft: 10 }}>
-          Space Bar: Space
-        </span>
-        <span style={{ padding: 20, border: "1px solid #aaa", marginLeft: 10 }}>
-          Backspace: Delete Last Word
-        </span>
-        <span style={{ padding: 20, border: "1px solid #aaa", marginLeft: 10 }}>
-          Delete: Clear entire sentence
-        </span>
-      </div>
+      <Instructions
+        instructions={[
+          "Mouse Click, Enter/Return: Add Phrase",
+          "Left Arrow: Go Back",
+          "Space Bar: Space",
+          "Backspace: Delete Last Word",
+          "Delete: Clear entire sentence",
+        ]}
+      />
     </div>
   );
 }

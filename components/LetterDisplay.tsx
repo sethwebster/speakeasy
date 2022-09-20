@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import useKeyPress from "../../hooks/useKeypress";
-import { useMouseDown } from "../../hooks/useMouseDown";
+import useKeyPress from "../hooks/useKeypress";
+import { useMouseDown } from "../hooks/useMouseDown";
 import Letter from "./Letter";
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
