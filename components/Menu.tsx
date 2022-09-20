@@ -1,6 +1,6 @@
 import { Children, useState } from "react";
 
-const MenuOptions = ["Phrases", "Letters"] as const;
+const MenuOptions = ["Phrases", "Letters", "Typing"] as const;
 
 export type MenuSelection = typeof MenuOptions[number];
 

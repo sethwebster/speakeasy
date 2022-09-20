@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import useAppState from "../data/app-state";
 import useKeyPress from "../hooks/useKeypress";
 import { useMouseDown } from "../hooks/useMouseDown";
 import Instructions from "./Instructions";
@@ -48,9 +49,29 @@ export default function LettersDisplay({
   words,
   speedMs,
 }: LettersDisplayProps) {
+  const [appState, setAppState] = useAppState();
   const [current, setCurrent] = useState(0);
-  const [sentence, setSentence] = useState("");
   const parent = useRef<HTMLDivElement>(null);
+
+  const sentence = appState.letterSentence || "";
+
+  const setSentence = useCallback(
+    (value: string | ((value: string) => void)) => {
+      if (typeof value === "string") {
+        setAppState((state) => ({
+          ...state,
+          letterSentence: value,
+        }));
+      }
+      if (typeof value === "function") {
+        setAppState((state) => ({
+          ...state,
+          letterSentence: value(state.letterSentence),
+        }));
+      }
+    },
+    [setAppState]
+  );
 
   const { letters: letterSet, words: possibleWords } = useMemo(() => {
     return possibleLetters(sentence, words);
@@ -90,7 +111,7 @@ export default function LettersDisplay({
     //   setSentence((s) => s + letterSet[0]);
     //   setCurrent(0);
     // }
-  }, [letterSet, letterSet.length]);
+  }, [letterSet, letterSet.length, setSentence]);
 
   useEffect(() => {
     let interval: NodeJS.Timer;
