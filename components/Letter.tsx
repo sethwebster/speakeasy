@@ -7,17 +7,9 @@ export default function Letter({
 }) {
   return (
     <div
-      style={{
-        fontSize: "11em",
-        textAlign: "center",
-        height: "200px",
-        width: "200px",
-        margin: 0,
-        padding: 0,
-        flex: 1,
-        border: "1px solid #333",
-        color: color === "dark" ? "#333" : "white",
-      }}
+      className={`text-9xl text-center h-36 w-1/6 border border-slate-800 ${
+        color === "dark" ? "text-slate-600" : "text-slate-400"
+      } `}
     >
       {letter}
     </div>

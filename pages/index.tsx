@@ -50,13 +50,13 @@ const Home: NextPage<NextPageProps> = ({ words }: NextPageProps) => {
           />
         </Menu>
         <div className="mt-20 h-full">
-          {/* {appState.mode === "Letters" && (
-          <LettersDisplay
-            play={speedSeconds > 0}
-            words={words}
-            speedMs={(speedSeconds > 0 ? speedSeconds : 2) * 1000}
-          />
-        )} */}
+          {appState.mode === "Letters" && (
+            <LettersDisplay
+              play={speedSeconds > 0}
+              words={words}
+              speedMs={(speedSeconds > 0 ? speedSeconds : 2) * 1000}
+            />
+          )}
 
           {appState.mode === "Phrases" && (
             <PhrasesDisplay

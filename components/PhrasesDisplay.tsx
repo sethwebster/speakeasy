@@ -105,17 +105,24 @@ export default function PhrasesDisplay({ play, speedMs }: PhraseDisplayProps) {
     []
   );
 
+  const addPhraseToState = useCallback(
+    (phrase: string) => {
+      setAppState((s) => ({
+        ...s,
+        phrases: [...s.phrases, phrase],
+      }));
+      setAdding(false);
+    },
+    [setAppState]
+  );
+
   const handleAddingKeyUp = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === "Enter") {
-        setAppState((s) => ({
-          ...s,
-          phrases: [...s.phrases, newPhrase],
-        }));
-        setAdding(false);
+        addPhraseToState(newPhrase);
       }
     },
-    [newPhrase, setAppState]
+    [addPhraseToState, newPhrase]
   );
 
   const handleMouseOver = useCallback((index: number) => {
@@ -181,15 +188,27 @@ export default function PhrasesDisplay({ play, speedMs }: PhraseDisplayProps) {
         ))}
       </div>
       {adding && (
-        <div style={{ margin: 4, width: "100%" }}>
+        <div className="m-2 w-full">
           <input
-            style={{ fontSize: "2em", padding: 20 }}
+            className="text-2xl p-5 bg-slate-600 text-slate-200"
             type="text"
             value={newPhrase}
             onChange={handleNewPhraseChanged}
             onKeyUp={handleAddingKeyUp}
             autoFocus
           />
+          <button
+            className="ml-2 rounded-md text-2xl p-5 bg-slate-400 text-slate-200"
+            onClick={() => addPhraseToState(newPhrase)}
+          >
+            Add
+          </button>
+          <button
+            className="ml-2 rounded-md text-2xl p-5 bg-slate-600 text-slate-100"
+            onClick={() => setAdding(false)}
+          >
+            Cancel
+          </button>
         </div>
       )}
       <div

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import useKeyPress from "../hooks/useKeypress";
 import { useMouseDown } from "../hooks/useMouseDown";
+import Instructions from "./Instructions";
 import Letter from "./Letter";
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -40,11 +41,6 @@ function possibleLetters(sentence: string, words: string[]) {
       .map((l) => l.letter),
     words: possibleWords,
   };
-}
-
-function inspect<T>(item: T, label: string): T {
-  console.log(label, item);
-  return item;
 }
 
 export default function LettersDisplay({
@@ -100,7 +96,7 @@ export default function LettersDisplay({
     let interval: NodeJS.Timer;
     if (play) {
       interval = setInterval(() => {
-        setCurrent((c) => inspect((c + 1) % letterSet.length, "current"));
+        setCurrent((c) => (c + 1) % letterSet.length);
       }, speedMs);
     }
     return () => clearInterval(interval);
@@ -111,23 +107,16 @@ export default function LettersDisplay({
 
   const size = 7 > letterSet.length ? letterSet.length : 7;
   for (let x = 0; x < size; x++) {
-    const index = inspect(
-      (current + x - prePost + letterSet.length) % letterSet.length,
-      "index"
-    );
+    const index = (current + x - prePost + letterSet.length) % letterSet.length;
 
     segment.push(letterSet[index < 0 ? letterSet.length + index : index]);
   }
 
-  segment = inspect(padBoth(segment.join(""), 7).split(""), "test");
+  segment = padBoth(segment.join(""), 7).split("");
 
   return (
-    <div ref={parent} style={{ height: "100vh", width: "100vw" }}>
-      <div
-        style={{
-          display: "flex",
-        }}
-      >
+    <div ref={parent} className="h-full w-full">
+      <div className="flex">
         {segment.map((letter, i) => (
           <Letter
             letter={letter}
@@ -136,51 +125,27 @@ export default function LettersDisplay({
           />
         ))}
       </div>
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          height: "2em",
-          overflow: "hidden",
-        }}
-      >
+      <div className="flex flex-wrap h-11 mt-2 overflow-hidden">
         {possibleWords.slice(0, 20).map((word) => (
           <div
             key={word}
-            style={{ padding: 10, marginLeft: 3, border: "1px solid #222" }}
+            className="p-2 text-slate-500 ml-3 border border-slate-600 rounded-md mb-2 shadow-md"
           >
             {word}
           </div>
         ))}
       </div>
-      <div style={{ fontSize: "10em", marginTop: 40 }}>{sentence}</div>
-      <div
-        style={{
-          position: "fixed",
-          bottom: 0,
-          color: "#ccc",
-          padding: 40,
-          border: "1px solid #333",
-          width: "100%",
-          background: "#222",
-        }}
-      >
-        <span style={{ padding: 20, border: "1px solid #aaa" }}>
-          Mouse Click, Enter/Return: Add Letter
-        </span>
-        <span style={{ padding: 20, border: "1px solid #aaa", marginLeft: 10 }}>
-          Left Arrow: Go Back
-        </span>
-        <span style={{ padding: 20, border: "1px solid #aaa", marginLeft: 10 }}>
-          Space Bar: Space, start new word
-        </span>
-        <span style={{ padding: 20, border: "1px solid #aaa", marginLeft: 10 }}>
-          Backspace: Delete Last Character
-        </span>
-        <span style={{ padding: 20, border: "1px solid #aaa", marginLeft: 10 }}>
-          Delete: Clear entire sentence
-        </span>
-      </div>
+      <div className="text-9xl text-slate-300">{sentence}</div>
+      <Instructions
+        instructions={[
+          "Mouse Click, Enter/Return: Add Letter",
+          "Left Arrow: Go Back",
+          "Space Bar: Space, start new word",
+          "Backspace: Delete Last Character",
+
+          "Delete: Clear entire sentence",
+        ]}
+      />
     </div>
   );
 }
