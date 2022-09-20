@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import useAppState from "../data/app-state";
 import useKeyPress from "../hooks/useKeypress";
 import { useMouseDown } from "../hooks/useMouseDown";
@@ -58,16 +65,20 @@ export default function LettersDisplay({
   const setSentence = useCallback(
     (value: string | ((value: string) => void)) => {
       if (typeof value === "string") {
-        setAppState((state) => ({
-          ...state,
-          letterSentence: value,
-        }));
+        startTransition(() => {
+          setAppState((state) => ({
+            ...state,
+            letterSentence: value,
+          }));
+        });
       }
       if (typeof value === "function") {
-        setAppState((state) => ({
-          ...state,
-          letterSentence: value(state.letterSentence),
-        }));
+        startTransition(() => {
+          setAppState((state) => ({
+            ...state,
+            letterSentence: value(state.letterSentence),
+          }));
+        });
       }
     },
     [setAppState]
