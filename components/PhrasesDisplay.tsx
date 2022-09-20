@@ -21,6 +21,43 @@ interface PhraseDisplayProps {
   speedMs: number;
 }
 
+function DeleteConfirmButton({
+  text,
+  onConfirm,
+}: {
+  text: string;
+  onConfirm: () => void;
+}) {
+  const [confirming, setConfirming] = useState(false);
+
+  return (
+    <>
+      {!confirming && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            setConfirming(true);
+          }}
+        >
+          {text}
+        </button>
+      )}
+      {confirming && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            onConfirm();
+          }}
+        >
+          Sure?
+        </button>
+      )}
+    </>
+  );
+}
+
 export default function PhrasesDisplay({ play, speedMs }: PhraseDisplayProps) {
   const [appState, setAppState] = useAppState();
   const [current, setCurrent] = useState(0);
@@ -30,6 +67,7 @@ export default function PhrasesDisplay({ play, speedMs }: PhraseDisplayProps) {
   const phrasesDiv = useRef<HTMLDivElement>(null);
   const sentenceDiv = useRef<HTMLDivElement>(null);
   const [mouseOverPause, setMouseOverPause] = useState(false);
+  const [mousedOver, setMousedOver] = useState(-1);
 
   const addToSentence = useCallback(() => {
     startTransition(() => {
@@ -37,11 +75,11 @@ export default function PhrasesDisplay({ play, speedMs }: PhraseDisplayProps) {
     });
   }, [appState.phrases, current]);
 
-  const leftPressed = useKeyPress("ArrowLeft", () => {
+  useKeyPress("ArrowLeft", () => {
     setCurrent((c) => (c === 0 ? appState.phrases.length - 1 : c - 1));
   });
 
-  const backspacePressed = useKeyPress("Backspace", () => {
+  useKeyPress("Backspace", () => {
     setSentence((s) =>
       s
         .split(" ")
@@ -49,11 +87,13 @@ export default function PhrasesDisplay({ play, speedMs }: PhraseDisplayProps) {
         .join(" ")
     );
   });
-  const deletePressed = useKeyPress("Delete", () => {
+
+  useKeyPress("Delete", () => {
     setSentence("");
     setCurrent(0);
   });
-  const spacePressed = useKeyPress(" ", () => {
+
+  useKeyPress(" ", () => {
     setSentence((s) => s + " ");
     setCurrent(0);
   });
@@ -80,11 +120,13 @@ export default function PhrasesDisplay({ play, speedMs }: PhraseDisplayProps) {
 
   const handleMouseOver = useCallback((index: number) => {
     setCurrent(index);
+    setMousedOver(index);
     setMouseOverPause(true);
   }, []);
 
   const handleMouseOut = useCallback(() => {
     setMouseOverPause(false);
+    setMousedOver(-1);
   }, []);
 
   useInterval(() => {
@@ -99,12 +141,6 @@ export default function PhrasesDisplay({ play, speedMs }: PhraseDisplayProps) {
         {appState.phrases.map((phrase, i) => (
           <>
             <div
-              onDoubleClick={() => {
-                setAppState((s) => ({
-                  ...s,
-                  phrases: s.phrases.filter((p) => p !== phrase),
-                }));
-              }}
               onClick={addToSentence}
               onMouseOver={() => handleMouseOver(i)}
               onMouseOut={handleMouseOut}
@@ -116,6 +152,21 @@ export default function PhrasesDisplay({ play, speedMs }: PhraseDisplayProps) {
               key={i + "" + phrase}
             >
               {phrase}
+              {mousedOver === i && (
+                <div className="absolute text-sm">
+                  <DeleteConfirmButton
+                    onConfirm={() => {
+                      setMousedOver(-1);
+                      setMouseOverPause(false);
+                      setAppState((s) => ({
+                        ...s,
+                        phrases: s.phrases.filter((p) => p !== phrase),
+                      }));
+                    }}
+                    text={"Delete"}
+                  />
+                </div>
+              )}
             </div>
             {/* Add the add button last */}
             {i === appState.phrases.length - 1 && !adding && (
