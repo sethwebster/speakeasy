@@ -1,4 +1,4 @@
-import {
+import React, {
   startTransition,
   useCallback,
   useEffect,
@@ -146,7 +146,7 @@ export default function PhrasesDisplay({ play, speedMs }: PhraseDisplayProps) {
     <div className="w-full h-full flex flex-col" id="phrases-wrapper">
       <div ref={phrasesDiv} className="flex flex-wrap w-full">
         {appState.phrases.map((phrase, i) => (
-          <>
+          <React.Fragment key={phrase}>
             <div
               onClick={addToSentence}
               onMouseOver={() => handleMouseOver(i)}
@@ -184,7 +184,7 @@ export default function PhrasesDisplay({ play, speedMs }: PhraseDisplayProps) {
                 +
               </button>
             )}
-          </>
+          </React.Fragment>
         ))}
       </div>
       {adding && (
